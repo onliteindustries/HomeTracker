@@ -7,7 +7,7 @@
     <application
         android:allowBackup="true"
         android:label="Home Tracker"
-        android:icon="@color/ic_launcher_background"
+        android:icon="@drawable/ic_launcher_background"
         android:theme="@style/AppTheme"
         android:usesCleartextTraffic="true">
         <activity
