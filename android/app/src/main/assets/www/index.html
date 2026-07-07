@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Home Construction Tracker</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#F5F5F5;color:#1A1A1A;font-size:14px;overflow-x:hidden}
+.app{max-width:480px;margin:0 auto;min-height:100vh;background:#F5F5F5;padding-bottom:80px}
+.header{background:#fff;padding:16px 16px 12px;border-bottom:1px solid #E5E5E5;position:sticky;top:0;z-index:100}
+.header-top{display:flex;align-items:center;justify-content:space-between}
+.header h1{font-size:18px;font-weight:600;color:#1A1A1A;display:flex;align-items:center;gap:8px}
+.header-icon{width:28px;height:28px;background:#7F77DD;border-radius:8px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:16px}
+.header-sub{font-size:12px;color:#888;margin-top:2px}
+.header-btns{display:flex;gap:8px}
+.hbtn{padding:6px 12px;font-size:12px;border:1px solid #E5E5E5;border-radius:8px;background:#fff;color:#333;cursor:pointer;display:flex;align-items:center;gap:4px;font-weight:500}
+.hbtn.purple{background:#7F77DD;color:#fff;border-color:#7F77DD}
+.budget-wrap{margin-top:10px}
+.budget-row{display:flex;justify-content:space-between;font-size:12px;color:#888;margin-bottom:5px}
+.budget-row span{color:#1A1A1A;font-weight:600}
+.bbar{height:8px;background:#E5E5E5;border-radius:4px;overflow:hidden}
+.bfill{height:100%;border-radius:4px;transition:width .4s}
+.budget-rem{font-size:11px;color:#888;margin-top:4px}
+.tabs{display:flex;background:#fff;border-bottom:1px solid #E5E5E5;position:sticky;top:77px;z-index:99;overflow-x:auto}
+.tab{flex:1;min-width:64px;padding:10px 4px 8px;text-align:center;font-size:10px;font-weight:500;cursor:pointer;border:none;background:transparent;color:#888;border-bottom:3px solid transparent;line-height:1.4}
+.tab .ti{font-size:18px;display:block;margin-bottom:2px}
+.tab.active{color:#7F77DD;border-bottom-color:#7F77DD}
+.section{display:none;padding:12px}
+.section.active{display:block}
+.summary-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px}
+.stat-card{background:#fff;border-radius:12px;padding:12px 14px;border:1px solid #E5E5E5}
+.stat-label{font-size:11px;color:#888;margin-bottom:4px}
+.stat-val{font-size:22px;font-weight:700}
+.stat-val.red{color:#E24B4A}.stat-val.purple{color:#7F77DD}.stat-val.amber{color:#BA7517}.stat-val.green{color:#0F6E56}
+.add-btn{width:100%;padding:12px;background:#fff;border:2px dashed #D0D0D0;border-radius:12px;font-size:14px;color:#555;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:12px;font-weight:500}
+.add-btn:active{background:#F5F5F5}
+.modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:200;align-items:flex-end}
+.modal-bg.open{display:flex}
+.modal{background:#fff;border-radius:20px 20px 0 0;padding:20px 16px 32px;width:100%;max-height:92vh;overflow-y:auto}
+.modal h3{font-size:16px;font-weight:600;margin-bottom:14px;display:flex;align-items:center;justify-content:space-between}
+.modal-close{background:none;border:none;font-size:22px;color:#888;cursor:pointer;padding:0 4px}
+.field{margin-bottom:12px}
+.field label{font-size:12px;color:#666;display:block;margin-bottom:5px;font-weight:500}
+.field input,.field select,.field textarea{width:100%;padding:11px 14px;font-size:14px;border:1px solid #E0E0E0;border-radius:10px;background:#fff;color:#1A1A1A;-webkit-appearance:none}
+.field input:focus,.field select:focus,.field textarea:focus{outline:none;border-color:#7F77DD}
+.field textarea{resize:none;height:68px}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.form-actions{display:flex;gap:10px;margin-top:16px}
+.btn-save{flex:1;padding:13px;background:#7F77DD;color:#fff;border:none;border-radius:10px;font-size:15px;font-weight:600;cursor:pointer}
+.btn-save:active{background:#534AB7}
+.btn-cancel{padding:13px 18px;background:#F5F5F5;border:none;border-radius:10px;font-size:15px;color:#555;cursor:pointer}
+.card{background:#fff;border:1px solid #E5E5E5;border-radius:14px;padding:13px 14px;margin-bottom:10px}
+.card-top{display:flex;justify-content:space-between;align-items:flex-start;gap:8px}
+.card-name{font-size:15px;font-weight:600;color:#1A1A1A}
+.card-sub{font-size:12px;color:#888;margin-top:3px}
+.card-actions{display:flex;gap:4px;flex-shrink:0}
+.icon-btn{background:#F5F5F5;border:none;cursor:pointer;border-radius:8px;padding:6px 8px;font-size:16px;color:#555}
+.icon-btn:active{background:#E5E5E5}
+.badge{font-size:11px;padding:3px 9px;border-radius:20px;font-weight:600}
+.badge.pending{background:#FFF3E0;color:#E65100}
+.badge.paid{background:#E8F5E9;color:#1B5E20}
+.badge.partial{background:#E3F2FD;color:#0D47A1}
+.card-divider{border-top:1px solid #F0F0F0;margin-top:10px;padding-top:10px;display:flex;justify-content:space-between;align-items:center}
+.card-amount{font-size:16px;font-weight:700;color:#1A1A1A}
+.card-date{font-size:11px;color:#AAA}
+.paid-row{font-size:12px;color:#888;margin-top:8px;display:flex;gap:16px}
+.paid-row strong{color:#1A1A1A}
+.note-text{font-size:12px;color:#888;margin-top:6px;line-height:1.4}
+.receipt-img{max-width:100%;max-height:90px;border-radius:8px;margin-top:8px;object-fit:cover}
+.empty{text-align:center;padding:48px 20px;color:#AAA;font-size:14px}
+.empty-icon{font-size:40px;margin-bottom:8px;display:block}
+.prog-row{margin-bottom:12px}
+.prog-label{display:flex;justify-content:space-between;font-size:12px;color:#888;margin-bottom:5px}
+.prog-bar{height:8px;background:#E5E5E5;border-radius:4px;overflow:hidden}
+.prog-fill{height:100%;border-radius:4px}
+.sec-title{font-size:11px;font-weight:700;color:#AAA;letter-spacing:.8px;text-transform:uppercase;margin:14px 0 8px}
+.filter-row{display:flex;gap:8px;margin-bottom:12px;overflow-x:auto;padding-bottom:2px}
+.filter-btn{padding:6px 14px;border-radius:20px;border:1px solid #E0E0E0;background:#fff;font-size:12px;cursor:pointer;white-space:nowrap;color:#555;font-weight:500}
+.filter-btn.active{background:#7F77DD;color:#fff;border-color:#7F77DD}
+.photo-label{display:flex;align-items:center;gap:6px;padding:10px 14px;border:1px dashed #CCC;border-radius:10px;cursor:pointer;color:#888;font-size:13px;margin-top:-4px}
+.photo-label:active{background:#F5F5F5}
+input[type=file]{display:none}
+.section-card{background:#fff;border-radius:14px;padding:14px;margin-bottom:12px;border:1px solid #E5E5E5}
+</style>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css">
+</head>
+<body>
+<div class="app">
+  <div class="header">
+    <div class="header-top">
+      <h1><div class="header-icon">🏠</div><div><div id="proj-display">Home Tracker</div><div class="header-sub" id="proj-sub">Tap ⚙ to set budget</div></div></h1>
+      <div class="header-btns">
+        <button class="hbtn" onclick="openBudgetModal()">⚙</button>
+        <button class="hbtn purple" onclick="exportExcel()">⬇ Excel</button>
+      </div>
+    </div>
+    <div class="budget-wrap" id="budget-wrap" style="display:none">
+      <div class="budget-row">Spent <span id="bb-spent">₹0</span> of <span id="bb-budget">₹0</span> <span id="bb-pct" style="color:#888;font-weight:400"></span></div>
+      <div class="bbar"><div class="bfill" id="bb-fill" style="width:0%"></div></div>
+      <div class="budget-rem">Remaining: <strong id="bb-rem">-</strong></div>
+    </div>
+  </div>
+
+  <div class="tabs">
+    <button class="tab active" onclick="switchTab('dashboard')"><span class="ti ti-dashboard"></span>Dashboard</button>
+    <button class="tab" onclick="switchTab('materials')"><span class="ti ti-package"></span>Materials</button>
+    <button class="tab" onclick="switchTab('supplier')"><span class="ti ti-truck"></span>Supplier</button>
+    <button class="tab" onclick="switchTab('labour')"><span class="ti ti-users"></span>Labour</button>
+    <button class="tab" onclick="switchTab('payments')"><span class="ti ti-receipt"></span>Payments</button>
+  </div>
+
+  <!-- DASHBOARD -->
+  <div id="tab-dashboard" class="section active">
+    <div class="summary-grid" id="summary-cards"></div>
+    <div class="sec-title">Category breakdown</div>
+    <div id="prog-section" class="section-card"></div>
+    <div class="sec-title">Recent activity</div>
+    <div id="recent-list"></div>
+  </div>
+
+  <!-- MATERIALS -->
+  <div id="tab-materials" class="section">
+    <button class="add-btn" onclick="openModal('mat-modal',null)">＋ Add Material</button>
+    <div id="mat-list"></div>
+  </div>
+
+  <!-- SUPPLIER -->
+  <div id="tab-supplier" class="section">
+    <button class="add-btn" onclick="openModal('sup-modal',null)">＋ Add Supplier</button>
+    <div id="sup-list"></div>
+  </div>
+
+  <!-- LABOUR -->
+  <div id="tab-labour" class="section">
+    <button class="add-btn" onclick="openModal('lab-modal',null)">＋ Add Labour / Worker</button>
+    <div id="lab-list"></div>
+  </div>
+
+  <!-- PAYMENTS -->
+  <div id="tab-payments" class="section">
+    <button class="add-btn" onclick="openModal('pay-modal',null)">＋ Add Payment</button>
+    <div class="filter-row" id="pay-filters"></div>
+    <div id="pay-list"></div>
+  </div>
+</div>
+
+<!-- BUDGET MODAL -->
+<div class="modal-bg" id="budget-modal">
+  <div class="modal">
+    <h3>Project Settings <button class="modal-close" onclick="closeBudgetModal()">✕</button></h3>
+    <div class="field"><label>Project name</label><input id="proj-name" placeholder="My Dream Home, Jabalpur"></div>
+    <div class="field"><label>Total project budget (₹)</label><input id="proj-budget" type="number" placeholder="2500000"></div>
+    <div class="form-actions">
+      <button class="btn-cancel" onclick="closeBudgetModal()">Cancel</button>
+      <button class="btn-save" onclick="saveBudget()">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- MATERIAL MODAL -->
+<div class="modal-bg" id="mat-modal">
+  <div class="modal">
+    <h3 id="mat-modal-title">Add Material <button class="modal-close" onclick="closeModal('mat-modal')">✕</button></h3>
+    <div class="field"><label>Material name</label><input id="m-name" placeholder="Cement, Sand, Steel rod, Bricks..."></div>
+    <div class="row2">
+      <div class="field"><label>Quantity</label><input id="m-qty" type="number" placeholder="100"></div>
+      <div class="field"><label>Unit</label><select id="m-unit"><option>bag</option><option>kg</option><option>ton</option><option>cubic ft</option><option>sq ft</option><option>piece</option><option>litre</option><option>trolley</option><option>bundle</option><option>sheet</option></select></div>
+    </div>
+    <div class="row2">
+      <div class="field"><label>Rate / unit (₹)</label><input id="m-rate" type="number" placeholder="350"></div>
+      <div class="field"><label>Supplier name</label><input id="m-supplier" placeholder="Sharma Traders"></div>
+    </div>
+    <div class="field"><label>Date</label><input id="m-date" type="date"></div>
+    <div class="field"><label>Notes</label><textarea id="m-note" placeholder="Any additional info..."></textarea></div>
+    <div class="field"><label>Receipt / Photo</label><label class="photo-label" for="m-photo">📷 Tap to attach photo or bill</label><input type="file" id="m-photo" accept="image/*"></div>
+    <div id="m-photo-preview"></div>
+    <div class="form-actions">
+      <button class="btn-cancel" onclick="closeModal('mat-modal')">Cancel</button>
+      <button class="btn-save" id="mat-save-btn" onclick="saveMaterial()">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- SUPPLIER MODAL -->
+<div class="modal-bg" id="sup-modal">
+  <div class="modal">
+    <h3 id="sup-modal-title">Add Supplier <button class="modal-close" onclick="closeModal('sup-modal')">✕</button></h3>
+    <div class="field"><label>Supplier name</label><input id="s-name" placeholder="Sharma Building Materials"></div>
+    <div class="field"><label>Items / materials supplied</label><input id="s-item" placeholder="Cement, TMT Bars, Bricks..."></div>
+    <div class="row2">
+      <div class="field"><label>Total bill (₹)</label><input id="s-total" type="number" placeholder="50000"></div>
+      <div class="field"><label>Paid so far (₹)</label><input id="s-paid" type="number" placeholder="25000"></div>
+    </div>
+    <div class="field"><label>Date</label><input id="s-date" type="date"></div>
+    <div class="field"><label>Invoice no. / notes</label><textarea id="s-note" placeholder="Invoice #INV-001, delivery date..."></textarea></div>
+    <div class="field"><label>Receipt / Invoice photo</label><label class="photo-label" for="s-photo">📷 Tap to attach invoice</label><input type="file" id="s-photo" accept="image/*"></div>
+    <div id="s-photo-preview"></div>
+    <div class="form-actions">
+      <button class="btn-cancel" onclick="closeModal('sup-modal')">Cancel</button>
+      <button class="btn-save" id="sup-save-btn" onclick="saveSupplier()">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- LABOUR MODAL -->
+<div class="modal-bg" id="lab-modal">
+  <div class="modal">
+    <h3 id="lab-modal-title">Add Labour <button class="modal-close" onclick="closeModal('lab-modal')">✕</button></h3>
+    <div class="field"><label>Worker / contractor name</label><input id="l-name" placeholder="Ramesh Kumar"></div>
+    <div class="field"><label>Work type</label>
+      <select id="l-type"><option>Mason</option><option>Plumber</option><option>Electrician</option><option>Carpenter</option><option>Painter</option><option>Contractor</option><option>Helper / Labour</option><option>Tiler</option><option>Interior designer</option><option>Welder</option><option>Architect</option><option>Other</option></select>
+    </div>
+    <div class="row2">
+      <div class="field"><label>Total agreed (₹)</label><input id="l-total" type="number" placeholder="30000"></div>
+      <div class="field"><label>Paid so far (₹)</label><input id="l-paid" type="number" placeholder="15000"></div>
+    </div>
+    <div class="field"><label>Date</label><input id="l-date" type="date"></div>
+    <div class="field"><label>Work description</label><textarea id="l-note" placeholder="Brickwork ground floor, bathroom tiling..."></textarea></div>
+    <div class="field"><label>Receipt / Agreement photo</label><label class="photo-label" for="l-photo">📷 Tap to attach photo</label><input type="file" id="l-photo" accept="image/*"></div>
+    <div id="l-photo-preview"></div>
+    <div class="form-actions">
+      <button class="btn-cancel" onclick="closeModal('lab-modal')">Cancel</button>
+      <button class="btn-save" id="lab-save-btn" onclick="saveLabour()">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- PAYMENT MODAL -->
+<div class="modal-bg" id="pay-modal">
+  <div class="modal">
+    <h3 id="pay-modal-title">Record Payment <button class="modal-close" onclick="closeModal('pay-modal')">✕</button></h3>
+    <div class="row2">
+      <div class="field"><label>Category</label>
+        <select id="p-cat"><option>Material</option><option>Supplier</option><option>Labour</option><option>Architect/Designer</option><option>Permit/Govt</option><option>Other</option></select>
+      </div>
+      <div class="field"><label>Amount (₹)</label><input id="p-amt" type="number" placeholder="10000"></div>
+    </div>
+    <div class="field"><label>Paid to</label><input id="p-to" placeholder="Name / shop / firm"></div>
+    <div class="row2">
+      <div class="field"><label>Payment mode</label>
+        <select id="p-mode"><option>Cash</option><option>UPI</option><option>Bank transfer</option><option>Cheque</option><option>Credit</option></select>
+      </div>
+      <div class="field"><label>Date</label><input id="p-date" type="date"></div>
+    </div>
+    <div class="field"><label>Note / reference</label><textarea id="p-note" placeholder="UPI ref, cheque no, purpose..."></textarea></div>
+    <div class="field"><label>Receipt photo</label><label class="photo-label" for="p-photo">📷 Tap to attach receipt</label><input type="file" id="p-photo" accept="image/*"></div>
+    <div id="p-photo-preview"></div>
+    <div class="form-actions">
+      <button class="btn-cancel" onclick="closeModal('pay-modal')">Cancel</button>
+      <button class="btn-save" id="pay-save-btn" onclick="savePayment()">Save</button>
+    </div>
+  </div>
+</div>
+
+<script src="xlsx.full.min.js"></script>
+<script>
+var data={materials:[],suppliers:[],labour:[],payments:[],project:{name:'',budget:0}};
+var editId={mat:null,sup:null,lab:null,pay:null};
+try{var s=localStorage.getItem('hct_v3');if(s)data=JSON.parse(s);}catch(e){}
+function save(){try{localStorage.setItem('hct_v3',JSON.stringify(data));}catch(e){}}
+function fmt(n){return '₹'+Math.round(Number(n)||0).toLocaleString('en-IN');}
+function today(){return new Date().toISOString().split('T')[0];}
+function totalSpent(){return data.suppliers.reduce(function(a,s){return a+s.paid;},0)+data.labour.reduce(function(a,l){return a+l.paid;},0)+data.payments.reduce(function(a,p){return a+p.amt;},0);}
+
+function openBudgetModal(){document.getElementById('proj-name').value=data.project.name||'';document.getElementById('proj-budget').value=data.project.budget||'';document.getElementById('budget-modal').classList.add('open');}
+function closeBudgetModal(){document.getElementById('budget-modal').classList.remove('open');}
+function saveBudget(){data.project.name=document.getElementById('proj-name').value.trim();data.project.budget=parseFloat(document.getElementById('proj-budget').value)||0;save();closeBudgetModal();updateHeader();}
+function updateHeader(){
+  var n=data.project.name;
+  document.getElementById('proj-display').textContent=n||'Home Construction Tracker';
+  document.getElementById('proj-sub').textContent=data.project.budget?(fmt(data.project.budget)+' budget set'):'Tap ⚙ to set project budget';
+  var b=data.project.budget,sp=totalSpent();
+  if(b>0){
+    document.getElementById('budget-wrap').style.display='block';
+    document.getElementById('bb-spent').textContent=fmt(sp);
+    document.getElementById('bb-budget').textContent=fmt(b);
+    var pct=Math.min(100,Math.round(sp/b*100));
+    document.getElementById('bb-pct').textContent=pct+'%';
+    var fill=document.getElementById('bb-fill');
+    fill.style.width=pct+'%';
+    fill.style.background=pct>90?'#E24B4A':pct>70?'#EF9F27':'#7F77DD';
+    var rem=b-sp;
+    document.getElementById('bb-rem').textContent=fmt(Math.max(0,rem));
+    document.getElementById('bb-rem').style.color=rem<0?'#E24B4A':'#0F6E56';
+  }else{document.getElementById('budget-wrap').style.display='none';}
+}
+
+function openModal(id,editingId){
+  document.querySelectorAll('.modal-bg').forEach(function(m){m.classList.remove('open');});
+  document.getElementById(id).classList.add('open');
+  var t=today();
+  if(id==='mat-modal'){editId.mat=editingId;document.getElementById('mat-modal-title').innerHTML=(editingId?'Edit':'Add')+' Material <button class="modal-close" onclick="closeModal(\'mat-modal\')">✕</button>';document.getElementById('mat-save-btn').textContent=editingId?'Update':'Save';document.getElementById('m-photo-preview').innerHTML='';if(editingId){var m=data.materials.find(function(x){return x.id===editingId;});if(m){document.getElementById('m-name').value=m.name;document.getElementById('m-qty').value=m.qty;document.getElementById('m-unit').value=m.unit;document.getElementById('m-rate').value=m.rate;document.getElementById('m-supplier').value=m.supplier||'';document.getElementById('m-date').value=m.date;document.getElementById('m-note').value=m.note||'';if(m.photo)document.getElementById('m-photo-preview').innerHTML='<img src="'+m.photo+'" class="receipt-img">';}}else{['m-name','m-qty','m-rate','m-supplier','m-note'].forEach(function(i){document.getElementById(i).value='';});document.getElementById('m-date').value=t;}}
+  if(id==='sup-modal'){editId.sup=editingId;document.getElementById('sup-modal-title').innerHTML=(editingId?'Edit':'Add')+' Supplier <button class="modal-close" onclick="closeModal(\'sup-modal\')">✕</button>';document.getElementById('sup-save-btn').textContent=editingId?'Update':'Save';document.getElementById('s-photo-preview').innerHTML='';if(editingId){var s=data.suppliers.find(function(x){return x.id===editingId;});if(s){document.getElementById('s-name').value=s.name;document.getElementById('s-item').value=s.item||'';document.getElementById('s-total').value=s.total;document.getElementById('s-paid').value=s.paid;document.getElementById('s-date').value=s.date;document.getElementById('s-note').value=s.note||'';if(s.photo)document.getElementById('s-photo-preview').innerHTML='<img src="'+s.photo+'" class="receipt-img">';}}else{['s-name','s-item','s-total','s-paid','s-note'].forEach(function(i){document.getElementById(i).value='';});document.getElementById('s-date').value=t;}}
+  if(id==='lab-modal'){editId.lab=editingId;document.getElementById('lab-modal-title').innerHTML=(editingId?'Edit':'Add')+' Labour <button class="modal-close" onclick="closeModal(\'lab-modal\')">✕</button>';document.getElementById('lab-save-btn').textContent=editingId?'Update':'Save';document.getElementById('l-photo-preview').innerHTML='';if(editingId){var l=data.labour.find(function(x){return x.id===editingId;});if(l){document.getElementById('l-name').value=l.name;document.getElementById('l-type').value=l.type;document.getElementById('l-total').value=l.total;document.getElementById('l-paid').value=l.paid;document.getElementById('l-date').value=l.date;document.getElementById('l-note').value=l.note||'';if(l.photo)document.getElementById('l-photo-preview').innerHTML='<img src="'+l.photo+'" class="receipt-img">';}}else{['l-name','l-total','l-paid','l-note'].forEach(function(i){document.getElementById(i).value='';});document.getElementById('l-date').value=t;}}
+  if(id==='pay-modal'){editId.pay=editingId;document.getElementById('pay-modal-title').innerHTML=(editingId?'Edit':'Record')+' Payment <button class="modal-close" onclick="closeModal(\'pay-modal\')">✕</button>';document.getElementById('pay-save-btn').textContent=editingId?'Update':'Save';document.getElementById('p-photo-preview').innerHTML='';if(editingId){var p=data.payments.find(function(x){return x.id===editingId;});if(p){document.getElementById('p-cat').value=p.cat;document.getElementById('p-amt').value=p.amt;document.getElementById('p-to').value=p.to;document.getElementById('p-mode').value=p.mode;document.getElementById('p-date').value=p.date;document.getElementById('p-note').value=p.note||'';if(p.photo)document.getElementById('p-photo-preview').innerHTML='<img src="'+p.photo+'" class="receipt-img">';}}else{['p-amt','p-to','p-note'].forEach(function(i){document.getElementById(i).value='';});document.getElementById('p-date').value=t;}}
+}
+function closeModal(id){document.getElementById(id).classList.remove('open');}
+
+['m-photo','s-photo','l-photo','p-photo'].forEach(function(id){
+  var prev=id.replace('-photo','')+'-photo-preview';
+  document.getElementById(id).addEventListener('change',function(e){
+    var f=e.target.files[0];if(!f)return;
+    var r=new FileReader();r.onload=function(ev){document.getElementById(prev).innerHTML='<img src="'+ev.target.result+'" class="receipt-img">';};r.readAsDataURL(f);
+  });
+});
+
+function readPhoto(inputId,cb){var f=document.getElementById(inputId).files[0];if(!f){cb(null);return;}var r=new FileReader();r.onload=function(e){cb(e.target.result);};r.readAsDataURL(f);}
+
+function saveMaterial(){
+  var name=document.getElementById('m-name').value.trim();
+  var qty=parseFloat(document.getElementById('m-qty').value)||0;
+  var rate=parseFloat(document.getElementById('m-rate').value)||0;
+  if(!name)return alert('Please enter material name');
+  readPhoto('m-photo',function(photo){
+    var obj={name:name,qty:qty,unit:document.getElementById('m-unit').value,rate:rate,total:qty*rate,supplier:document.getElementById('m-supplier').value,date:document.getElementById('m-date').value||today(),note:document.getElementById('m-note').value};
+    if(photo)obj.photo=photo;
+    if(editId.mat){var i=data.materials.findIndex(function(x){return x.id===editId.mat;});if(i>-1){obj.id=editId.mat;data.materials[i]=obj;}}
+    else{obj.id=Date.now();data.materials.push(obj);}
+    save();closeModal('mat-modal');renderMat();updateHeader();
+  });
+}
+function saveSupplier(){
+  var name=document.getElementById('s-name').value.trim();
+  if(!name)return alert('Please enter supplier name');
+  readPhoto('s-photo',function(photo){
+    var obj={name:name,item:document.getElementById('s-item').value,total:parseFloat(document.getElementById('s-total').value)||0,paid:parseFloat(document.getElementById('s-paid').value)||0,date:document.getElementById('s-date').value||today(),note:document.getElementById('s-note').value};
+    if(photo)obj.photo=photo;
+    if(editId.sup){var i=data.suppliers.findIndex(function(x){return x.id===editId.sup;});if(i>-1){obj.id=editId.sup;data.suppliers[i]=obj;}}
+    else{obj.id=Date.now();data.suppliers.push(obj);}
+    save();closeModal('sup-modal');renderSup();updateHeader();
+  });
+}
+function saveLabour(){
+  var name=document.getElementById('l-name').value.trim();
+  if(!name)return alert('Please enter worker name');
+  readPhoto('l-photo',function(photo){
+    var obj={name:name,type:document.getElementById('l-type').value,total:parseFloat(document.getElementById('l-total').value)||0,paid:parseFloat(document.getElementById('l-paid').value)||0,date:document.getElementById('l-date').value||today(),note:document.getElementById('l-note').value};
+    if(photo)obj.photo=photo;
+    if(editId.lab){var i=data.labour.findIndex(function(x){return x.id===editId.lab;});if(i>-1){obj.id=editId.lab;data.labour[i]=obj;}}
+    else{obj.id=Date.now();data.labour.push(obj);}
+    save();closeModal('lab-modal');renderLab();updateHeader();
+  });
+}
+function savePayment(){
+  var to=document.getElementById('p-to').value.trim();
+  var amt=parseFloat(document.getElementById('p-amt').value)||0;
+  if(!to||!amt)return alert('Please fill paid-to and amount');
+  readPhoto('p-photo',function(photo){
+    var obj={cat:document.getElementById('p-cat').value,amt:amt,to:to,mode:document.getElementById('p-mode').value,date:document.getElementById('p-date').value||today(),note:document.getElementById('p-note').value};
+    if(photo)obj.photo=photo;
+    if(editId.pay){var i=data.payments.findIndex(function(x){return x.id===editId.pay;});if(i>-1){obj.id=editId.pay;data.payments[i]=obj;}}
+    else{obj.id=Date.now();data.payments.push(obj);}
+    save();closeModal('pay-modal');renderPay(payFilter);updateHeader();
+  });
+}
+function del(arr,id){if(!confirm('Delete this record?'))return;var i=data[arr].findIndex(function(x){return x.id===id;});if(i>-1)data[arr].splice(i,1);save();updateHeader();if(arr==='materials')renderMat();if(arr==='suppliers')renderSup();if(arr==='labour')renderLab();if(arr==='payments')renderPay(payFilter);}
+
+function ph(p){return p?'<img src="'+p+'" class="receipt-img">':'';}
+function renderMat(){
+  document.getElementById('mat-list').innerHTML=data.materials.length?data.materials.slice().reverse().map(function(m){return'<div class="card"><div class="card-top"><div><div class="card-name">'+m.name+'</div><div class="card-sub">'+m.qty+' '+m.unit+' @ '+fmt(m.rate)+'/'+m.unit+(m.supplier?' · '+m.supplier:'')+'</div></div><div class="card-actions"><button class="icon-btn" onclick="openModal(\'mat-modal\','+m.id+')">✏️</button><button class="icon-btn" onclick="del(\'materials\','+m.id+')">🗑️</button></div></div>'+(m.note?'<div class="note-text">'+m.note+'</div>':'')+ph(m.photo)+'<div class="card-divider"><div class="card-amount">'+fmt(m.total)+'</div><div class="card-date">'+m.date+'</div></div></div>';}).join(''):'<div class="empty"><span class="empty-icon">📦</span>No materials added yet</div>';
+}
+function renderSup(){
+  document.getElementById('sup-list').innerHTML=data.suppliers.length?data.suppliers.slice().reverse().map(function(s){var pend=Math.max(0,s.total-s.paid);var st=pend===0?'paid':s.paid===0?'pending':'partial';return'<div class="card"><div class="card-top"><div><div class="card-name">'+s.name+'</div><div class="card-sub">'+(s.item||'')+'</div></div><div style="display:flex;align-items:center;gap:6px"><span class="badge '+st+'">'+st+'</span><button class="icon-btn" onclick="openModal(\'sup-modal\','+s.id+')">✏️</button><button class="icon-btn" onclick="del(\'suppliers\','+s.id+')">🗑️</button></div></div><div class="paid-row">Paid: <strong>'+fmt(s.paid)+'</strong> &nbsp;|&nbsp; Pending: <strong style="color:#E24B4A">'+fmt(pend)+'</strong></div>'+(s.note?'<div class="note-text">'+s.note+'</div>':'')+ph(s.photo)+'<div class="card-divider"><div class="card-amount">Total '+fmt(s.total)+'</div><div class="card-date">'+s.date+'</div></div></div>';}).join(''):'<div class="empty"><span class="empty-icon">🚛</span>No supplier records yet</div>';
+}
+function renderLab(){
+  document.getElementById('lab-list').innerHTML=data.labour.length?data.labour.slice().reverse().map(function(l){var pend=Math.max(0,l.total-l.paid);var st=pend===0?'paid':l.paid===0?'pending':'partial';return'<div class="card"><div class="card-top"><div><div class="card-name">'+l.name+'</div><div class="card-sub">'+l.type+'</div></div><div style="display:flex;align-items:center;gap:6px"><span class="badge '+st+'">'+st+'</span><button class="icon-btn" onclick="openModal(\'lab-modal\','+l.id+')">✏️</button><button class="icon-btn" onclick="del(\'labour\','+l.id+')">🗑️</button></div></div><div class="paid-row">Paid: <strong>'+fmt(l.paid)+'</strong> &nbsp;|&nbsp; Pending: <strong style="color:#E24B4A">'+fmt(pend)+'</strong></div>'+(l.note?'<div class="note-text">'+l.note+'</div>':'')+ph(l.photo)+'<div class="card-divider"><div class="card-amount">Total '+fmt(l.total)+'</div><div class="card-date">'+l.date+'</div></div></div>';}).join(''):'<div class="empty"><span class="empty-icon">👷</span>No labour records yet</div>';
+}
+var payFilter='All';
+function renderPay(f){
+  payFilter=f;
+  var cats=['All','Material','Supplier','Labour','Architect/Designer','Permit/Govt','Other'];
+  document.getElementById('pay-filters').innerHTML=cats.map(function(c){return'<button class="filter-btn'+(c===payFilter?' active':'')+'" onclick="renderPay(\''+c+'\')">'+c+'</button>';}).join('');
+  var list=payFilter==='All'?data.payments:data.payments.filter(function(p){return p.cat===payFilter;});
+  document.getElementById('pay-list').innerHTML=list.length?list.slice().reverse().map(function(p){return'<div class="card"><div class="card-top"><div><div class="card-name">'+p.to+'</div><div class="card-sub">'+p.cat+' · '+p.mode+'</div></div><div class="card-actions"><button class="icon-btn" onclick="openModal(\'pay-modal\','+p.id+')">✏️</button><button class="icon-btn" onclick="del(\'payments\','+p.id+')">🗑️</button></div></div>'+(p.note?'<div class="note-text">'+p.note+'</div>':'')+ph(p.photo)+'<div class="card-divider"><div class="card-amount">'+fmt(p.amt)+'</div><div class="card-date">'+p.date+'</div></div></div>';}).join(''):'<div class="empty"><span class="empty-icon">🧾</span>No payments in this category</div>';
+}
+function switchTab(t){
+  var tabs=['dashboard','materials','supplier','labour','payments'];
+  document.querySelectorAll('.tab').forEach(function(b,i){b.classList.toggle('active',tabs[i]===t);});
+  document.querySelectorAll('.section').forEach(function(s){s.classList.remove('active');});
+  document.getElementById('tab-'+t).classList.add('active');
+  if(t==='dashboard')renderDash();if(t==='materials')renderMat();if(t==='supplier')renderSup();if(t==='labour')renderLab();if(t==='payments')renderPay(payFilter);
+}
+function renderDash(){
+  var mT=data.materials.reduce(function(a,m){return a+m.total;},0);
+  var sT=data.suppliers.reduce(function(a,s){return a+s.total;},0),sP=data.suppliers.reduce(function(a,s){return a+s.paid;},0);
+  var lT=data.labour.reduce(function(a,l){return a+l.total;},0),lP=data.labour.reduce(function(a,l){return a+l.paid;},0);
+  var pT=data.payments.reduce(function(a,p){return a+p.amt;},0);
+  var spent=sP+lP+pT;
+  document.getElementById('summary-cards').innerHTML='<div class="stat-card"><div class="stat-label">Total spent</div><div class="stat-val red">'+fmt(spent)+'</div></div><div class="stat-card"><div class="stat-label">Total committed</div><div class="stat-val purple">'+fmt(mT+sT+lT)+'</div></div><div class="stat-card"><div class="stat-label">Supplier pending</div><div class="stat-val amber">'+fmt(Math.max(0,sT-sP))+'</div></div><div class="stat-card"><div class="stat-label">Labour pending</div><div class="stat-val amber">'+fmt(Math.max(0,lT-lP))+'</div></div>';
+  var prog='';
+  if(mT)prog+='<div class="prog-row"><div class="prog-label"><span>Materials ('+data.materials.length+' items)</span><span>'+fmt(mT)+'</span></div><div class="prog-bar"><div class="prog-fill" style="width:100%;background:#1D9E75"></div></div></div>';
+  if(sT){var sp=Math.min(100,Math.round(sP/sT*100));prog+='<div class="prog-row"><div class="prog-label"><span>Suppliers ('+sp+'% paid)</span><span>'+fmt(sT)+'</span></div><div class="prog-bar"><div class="prog-fill" style="width:'+sp+'%;background:#7F77DD"></div></div></div>';}
+  if(lT){var lp2=Math.min(100,Math.round(lP/lT*100));prog+='<div class="prog-row"><div class="prog-label"><span>Labour ('+lp2+'% paid)</span><span>'+fmt(lT)+'</span></div><div class="prog-bar"><div class="prog-fill" style="width:'+lp2+'%;background:#D85A30"></div></div></div>';}
+  if(pT)prog+='<div class="prog-row"><div class="prog-label"><span>Direct payments ('+data.payments.length+')</span><span>'+fmt(pT)+'</span></div><div class="prog-bar"><div class="prog-fill" style="width:100%;background:#888"></div></div></div>';
+  document.getElementById('prog-section').innerHTML=prog||'<div style="color:#AAA;font-size:13px;text-align:center;padding:12px">Add records to see breakdown</div>';
+  var all=data.materials.map(function(m){return{date:m.date,label:m.name,sub:'Material · '+m.qty+' '+m.unit,amt:m.total,type:'material'};}).concat(data.suppliers.map(function(s){return{date:s.date,label:s.name,sub:'Supplier · '+(s.item||''),amt:s.total,type:'supplier'};})).concat(data.labour.map(function(l){return{date:l.date,label:l.name,sub:l.type,amt:l.total,type:'labour'};})).concat(data.payments.map(function(p){return{date:p.date,label:p.to,sub:'Payment · '+p.cat,amt:p.amt,type:'payment'};})).sort(function(a,b){return b.date.localeCompare(a.date);}).slice(0,6);
+  document.getElementById('recent-list').innerHTML=all.length?all.map(function(r){return'<div class="card"><div class="card-top"><div><div class="card-name">'+r.label+'</div><div class="card-sub">'+r.sub+'</div></div></div><div class="card-divider"><div class="card-amount">'+fmt(r.amt)+'</div><div class="card-date">'+r.date+'</div></div></div>';}).join(''):'<div class="empty"><span class="empty-icon">📋</span>No records yet. Start adding!</div>';
+}
+function exportExcel(){
+  if(typeof XLSX==='undefined'){alert('Please wait, loading Excel library...');return;}
+  var wb=XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(data.materials.length?data.materials.map(function(m){return{Date:m.date,Material:m.name,Qty:m.qty,Unit:m.unit,Rate:m.rate,Total:m.total,Supplier:m.supplier||'',Notes:m.note||''};}):[{Note:'No materials'}]),'Materials');
+  XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(data.suppliers.length?data.suppliers.map(function(s){return{Date:s.date,Supplier:s.name,Items:s.item||'','Total Bill':s.total,Paid:s.paid,Pending:Math.max(0,s.total-s.paid),Notes:s.note||''};}):[{Note:'No suppliers'}]),'Suppliers');
+  XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(data.labour.length?data.labour.map(function(l){return{Date:l.date,Worker:l.name,Type:l.type,'Total Agreed':l.total,Paid:l.paid,Pending:Math.max(0,l.total-l.paid),Work:l.note||''};}):[{Note:'No labour'}]),'Labour');
+  XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(data.payments.length?data.payments.map(function(p){return{Date:p.date,'Paid To':p.to,Category:p.cat,Amount:p.amt,Mode:p.mode,Note:p.note||''};}):[{Note:'No payments'}]),'Payments');
+  var sp=totalSpent();
+  XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet([{Item:'Project',Value:data.project.name||'-'},{Item:'Budget',Value:data.project.budget||0},{Item:'Total Spent',Value:sp},{Item:'Remaining',Value:Math.max(0,(data.project.budget||0)-sp)},{Item:'Materials Total',Value:data.materials.reduce(function(a,m){return a+m.total;},0)},{Item:'Supplier Billed',Value:data.suppliers.reduce(function(a,s){return a+s.total;},0)},{Item:'Supplier Paid',Value:data.suppliers.reduce(function(a,s){return a+s.paid;},0)},{Item:'Labour Agreed',Value:data.labour.reduce(function(a,l){return a+l.total;},0)},{Item:'Labour Paid',Value:data.labour.reduce(function(a,l){return a+l.paid;},0)},{Item:'Direct Payments',Value:data.payments.reduce(function(a,p){return a+p.amt;},0)}]),'Summary');
+  XLSX.writeFile(wb,(data.project.name||'Construction')+'_Tracker_'+today()+'.xlsx');
+}
+updateHeader();renderDash();
+</script>
+</body>
+</html>
