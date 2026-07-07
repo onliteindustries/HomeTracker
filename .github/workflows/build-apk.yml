@@ -31,6 +31,19 @@ jobs:
           gradle wrapper --gradle-version=8.4 --distribution-type=bin
           chmod +x gradlew
 
+      - name: Create debug keystore
+        run: |
+          mkdir -p ~/.android
+          keytool -genkey -v \
+            -keystore ~/.android/debug.keystore \
+            -alias androiddebugkey \
+            -keyalg RSA \
+            -keysize 2048 \
+            -validity 10000 \
+            -storepass android \
+            -keypass android \
+            -dname "CN=Android Debug,O=Android,C=US"
+
       - name: Build Release APK
         working-directory: android
         run: ./gradlew assembleRelease --no-daemon
